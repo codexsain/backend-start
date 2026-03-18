@@ -4,9 +4,12 @@
   "description": "thats a begin of backend codeing  with a project and    chai aur code youtube channel  ",
   "license": "ISC",
   "author": "sainx",
-  "type": "commonjs",
+  "type": "module",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "nodemon src/index.js"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.14"
   }
 }
