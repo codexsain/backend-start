@@ -42,10 +42,18 @@ connectDB()
 
 
 
+/*
+app.get('/', (req, res) => {
+    res.send('Hello World!');
 
+});
+                                    //     this two code is juct for testing the server is runing or not 
 
-
-
+app.get('/fuck', (req, res) => {
+    res.send(' fuck you');
+    
+});
+*/
 
 
 
