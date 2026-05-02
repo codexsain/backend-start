@@ -41,6 +41,8 @@ const generateAccessAndRefreshTokens = async (UserId) => {
 }
 
 
+
+
 const registerUser = asyncHandler(async (req, res, next) => {
 
     // get user details from frontend
@@ -132,6 +134,7 @@ const registerUser = asyncHandler(async (req, res, next) => {
 })
 
 
+
 const loginUser = asyncHandler(async (req, res, next) => {
 
 
@@ -215,6 +218,7 @@ const loginUser = asyncHandler(async (req, res, next) => {
 
 
 })
+
 
 
 const logOutUser = asyncHandler(async (req, res) => {
@@ -374,7 +378,6 @@ const getCurrentUser = asyncHandler(async (req, res) => {
 
 
 
-
 updateAccountDetails = asyncHandler(async (req, res) => {
 
     const { fullName, email } = req.body
@@ -450,8 +453,6 @@ const updateUserAvatar = asyncHandler(async (req, res) => {
 
 
 })
-
-
 
 
 
