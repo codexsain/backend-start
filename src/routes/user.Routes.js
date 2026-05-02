@@ -1,7 +1,7 @@
-import {Router} from 'express';
-import  {registerUser}  from '../controllers/userControllers.js';
-import {upload} from '../middlewares/multer.middlewares.js'
-import {loginUser , logOutUser} from '../controllers/userControllers.js'
+import { Router } from 'express';
+import { registerUser } from '../controllers/userControllers.js';
+import { upload } from '../middlewares/multer.middlewares.js'
+import { loginUser, logOutUser, refreshAccessToken } from '../controllers/userControllers.js'
 import { verifyJWT } from '../middlewares/auth.middlewares.js';
 
 
@@ -12,7 +12,7 @@ import { verifyJWT } from '../middlewares/auth.middlewares.js';
 const router = Router();
 
 router.route('/register').post(
-    
+
     upload.fields([
 
         {
@@ -25,15 +25,32 @@ router.route('/register').post(
         }
 
     ]),
-    
+
     registerUser
 
 );
 
-router.route('/login').post(loginUser)
+router.route('/login').post(
+    upload.none(),
+    loginUser)
 
 
 // secured route
-router.route('/logout').post( verifyJWT,   logOutUser)
+router.route('/logout').post(upload.none(),
+    verifyJWT,
+    logOutUser)
+
+
+
+router.route('/refresh-token').post(
+    upload.none(),
+    refreshAccessToken)
 
 export default router;
+
+
+
+
+
+
+
