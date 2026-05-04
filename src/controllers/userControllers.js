@@ -42,7 +42,6 @@ const generateAccessAndRefreshTokens = async (UserId) => {
 
 
 
-
 const registerUser = asyncHandler(async (req, res, next) => {
 
     // get user details from frontend
@@ -389,7 +388,7 @@ updateAccountDetails = asyncHandler(async (req, res) => {
 
 
 
-    User.findByIdAndUpdate(
+   const user = await User.findByIdAndUpdate(
 
         req.user?._id,
 
@@ -409,7 +408,7 @@ updateAccountDetails = asyncHandler(async (req, res) => {
 
     return res
         .status(200)
-        .json(new ApiResponse(200, {}, "account details updated successfully"))
+        .json(new ApiResponse(200, user, "account details updated successfully"))
 
 })
 
