@@ -4,6 +4,7 @@ import { User } from "../models/user.Model.js";
 import { uploadOnCloudinary } from "../utils/Cloudnary.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import jwt from "jsonwebtoken";
+import mongoose from "mongoose";
 
 const generateAccessAndRefreshTokens = async (UserId) => {
     try {
@@ -161,7 +162,7 @@ const loginUser = asyncHandler(async (req, res, next) => {
 
         )
 
-    })
+})
 
 
 const logOutUser = asyncHandler(async (req, res) => {
@@ -169,8 +170,8 @@ const logOutUser = asyncHandler(async (req, res) => {
         req.user._id,
 
         {
-            $set: {
-                refreshToken: undefined,
+            $unset: {
+                refreshToken: 1,
             },
         },
         {
@@ -194,7 +195,7 @@ const logOutUser = asyncHandler(async (req, res) => {
 
 
 const refreshAccessToken = asyncHandler(async (req, res) => {
-    const incomeingRefreshToken = req.refreshToken || req.body.refreshToken;
+    const incomeingRefreshToken = req.refreshToken ||  req.body.refreshToken;
 
     if (!incomeingRefreshToken) {
         // maybe i need to use next() on this code like before
@@ -272,7 +273,7 @@ const getCurrentUser = asyncHandler(async (req, res) => {
 
 
 
-updateAccountDetails = asyncHandler(async (req, res) => {
+const updateAccountDetails = asyncHandler(async (req, res) => {
     const { fullName, email } = req.body;
 
     if (!fullName || email) {
@@ -299,9 +300,6 @@ updateAccountDetails = asyncHandler(async (req, res) => {
         .status(200)
         .json(new ApiResponse(200, user, "account details updated successfully"));
 });
-
-
-
 const updateUserAvatar = asyncHandler(async (req, res) => {
     const avatarLocalPath = req.file?.path;
 
@@ -335,9 +333,6 @@ const updateUserAvatar = asyncHandler(async (req, res) => {
         .status(200)
         .json(new ApiResponse(200, user, "avatar updated successfully"));
 });
-
-
-
 const updateUserCoverImage = asyncHandler(async (req, res) => {
     const coverImageLocalPath = req.file?.path;
 
@@ -422,18 +417,18 @@ const getUserChannelProfile = asyncHandler(async (req, res) => {
 
                     $size: "$subscribers"
                 },
-                
+
                 channelSubscribedTOCount: {
                     $size: "$subscribedTO"
                 },
 
                 isSubscribed: {
                     $cond: {
-                        if: {$in:[req.user?._id, "$subscribers.subscriber"]},
+                        if: { $in: [req.user?._id, "$subscribers.subscriber"] },
                         then: true,
                         else: false,
-                            
-                        
+
+
                     }
                 }
 
@@ -441,11 +436,11 @@ const getUserChannelProfile = asyncHandler(async (req, res) => {
             },
 
 
-            
+
 
         },
 
-        
+
         {
             $project: {
                 fullName: 1,
@@ -464,17 +459,17 @@ const getUserChannelProfile = asyncHandler(async (req, res) => {
 
 
 
-   if(!channel?.length){
-    throw new ApiError(404 , "channel dose not exist")   //  may be i need to use next() like before but for now i am not sure
+    if (!channel?.length) {
+        throw new ApiError(404, "channel dose not exist")   //  may be i need to use next() like before but for now i am not sure
 
-   }
+    }
 
 
-       
 
-   return res
-   .status(200)
-   .json(new ApiResponse(200, channel[0], "channel profile fetched successfully"))
+
+    return res
+        .status(200)
+        .json(new ApiResponse(200, channel[0], "channel profile fetched successfully"))
 
 
 
@@ -486,7 +481,7 @@ const getUserChannelProfile = asyncHandler(async (req, res) => {
 
 
 
-const getWatchHistory = asyncHandler(async(req, res) => {
+const getWatchHistory = asyncHandler(async (req, res) => {
     const user = await User.aggregate([
         {
             $match: {
@@ -518,8 +513,8 @@ const getWatchHistory = asyncHandler(async(req, res) => {
                         }
                     },
                     {
-                        $addFields:{
-                            owner:{
+                        $addFields: {
+                            owner: {
                                 $first: "$owner"
                             }
                         }
@@ -530,31 +525,33 @@ const getWatchHistory = asyncHandler(async(req, res) => {
     ])
 
     return res
-    .status(200)
-    .json(
-        new ApiResponse(
-            200,
-            user[0].watchHistory,
-            "Watch history fetched successfully"
+        .status(200)
+        .json(
+            new ApiResponse(
+                200,
+                user[0].watchHistory,
+                "Watch history fetched successfully"
+            )
         )
-    )
 })
 
 
 
-export {
 
-    registerUser,
-    loginUser,
-    logOutUser,
-    refreshAccessToken,
-    getCurrentUser,
-    changeCurrentPassword,
-    updateAccountDetails,
+export {
     updateUserAvatar,
     updateUserCoverImage,
+    logOutUser,
+    loginUser,
+    registerUser,
+    changeCurrentPassword,
+    getCurrentUser,
     getUserChannelProfile,
-    getWatchHistory
+    getWatchHistory,
+    refreshAccessToken,
+    updateAccountDetails
+}
 
-};
+
+
 
