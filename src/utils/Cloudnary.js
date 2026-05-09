@@ -1,5 +1,7 @@
 import { v2 as cloudinary } from 'cloudinary';
 import fs from 'fs';
+// import { ApiResponse } from './ApiResponse';
+import { ApiError } from './ApiError.js';
 
 
 
@@ -25,7 +27,7 @@ const uploadOnCloudinary = async (localfilePath) => {
         })
 
         fs.unlinkSync(localfilePath) // remove the locally saved temporary file after successful upload
-        
+
         // file has been uploaded on cloudinary successfully
         // console.log('file uploaded successfully:', response.url);
         return response
@@ -46,10 +48,37 @@ const uploadOnCloudinary = async (localfilePath) => {
 
 
 
+const destroyOnCloudinary = async (publicId) => {
+
+    try {
+
+        if (!publicId) return null
+
+
+        const response = await cloudinary.uploader.destroy(publicId)
+        console.log(response)
+
+        return response
 
 
 
 
 
-export { uploadOnCloudinary }
+    }
+
+    catch (error) {
+
+   console.log(error)
+
+    }
+
+
+}
+
+
+
+
+export { uploadOnCloudinary, destroyOnCloudinary }
+
+
 

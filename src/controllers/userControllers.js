@@ -1,7 +1,7 @@
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import { User } from "../models/user.Model.js";
-import { uploadOnCloudinary } from "../utils/Cloudnary.js";
+import { uploadOnCloudinary, destroyOnCloudinary } from "../utils/Cloudnary.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import jwt from "jsonwebtoken";
 import mongoose from "mongoose";
@@ -74,9 +74,12 @@ const registerUser = asyncHandler(async (req, res, next) => {
     const avatar = await uploadOnCloudinary(avatarLocalPath);
     const coverImage = await uploadOnCloudinary(coverImageLocalPath);
 
+
+
     if (!avatar) {
         throw new ApiError(400, "Avatar file is required");
     }
+
 
     const user = await User.create({
         fullName,
@@ -85,6 +88,9 @@ const registerUser = asyncHandler(async (req, res, next) => {
         username: username.toLowerCase(),
         email,
         password,
+        avatarPublicId: avatar.public_id,
+        coverImagePublicId:coverImage.public_id
+
     });
 
     const createdUser = await User.findById(user._id).select(
@@ -199,7 +205,7 @@ const logOutUser = asyncHandler(async (req, res) => {
 
 
 const refreshAccessToken = asyncHandler(async (req, res) => {
-    const incomeingRefreshToken = req.refreshToken ||  req.body.refreshToken;
+    const incomeingRefreshToken = req.refreshToken || req.body.refreshToken;
 
     if (!incomeingRefreshToken) {
         // maybe i need to use next() on this code like before
@@ -304,6 +310,10 @@ const updateAccountDetails = asyncHandler(async (req, res) => {
         .status(200)
         .json(new ApiResponse(200, user, "account details updated successfully"));
 });
+
+
+
+
 const updateUserAvatar = asyncHandler(async (req, res) => {
     const avatarLocalPath = req.file?.path;
 
@@ -311,6 +321,10 @@ const updateUserAvatar = asyncHandler(async (req, res) => {
         // maybe i need to use next() on this code like before but for now i am not sure
         throw new ApiError(400, "avatar file is missing");
     }
+
+    console.log(req.user.avatarPublicId)
+    await destroyOnCloudinary(req.user.avatarPublicId)
+
 
     const avatar = await uploadOnCloudinary(avatarLocalPath);
 
@@ -321,11 +335,14 @@ const updateUserAvatar = asyncHandler(async (req, res) => {
         );
     }
 
+
     const user = await User.findByIdAndUpdate(
         req.user?._id,
         {
             $set: {
                 avatar: avatar.url,
+                avatarPublicId:avatar.public_id
+           
             },
         },
         {
@@ -345,6 +362,13 @@ const updateUserCoverImage = asyncHandler(async (req, res) => {
         throw new ApiError(400, "cover image file is missing");
     }
 
+    
+    console.log(req.user.coverImagePublicId)
+    await destroyOnCloudinary(req.user.coverImagePublicId)
+
+
+
+
     const coverImage = await uploadOnCloudinary(coverImageLocalPath);
 
     if (!coverImage.url) {
@@ -359,6 +383,7 @@ const updateUserCoverImage = asyncHandler(async (req, res) => {
         {
             $set: {
                 coverImage: coverImage.url,
+                coverImagePublicId: coverImage.public_id
             },
         },
         {

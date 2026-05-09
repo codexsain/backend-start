@@ -1,6 +1,7 @@
 import mongoose, { Schema } from "mongoose";
 import jwt from "jsonwebtoken"
 import bcrypt from "bcrypt"
+import { type } from "os";
 
 
 
@@ -49,6 +50,12 @@ const userSchema = new Schema({
     },
     refreshToken: {
         type: String
+    },
+    avatarPublicId:{
+        type: String
+    },
+    coverImagePublicId:{
+        type:String
     }
 
 
