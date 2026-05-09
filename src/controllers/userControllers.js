@@ -5,6 +5,9 @@ import { uploadOnCloudinary } from "../utils/Cloudnary.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import jwt from "jsonwebtoken";
 import mongoose from "mongoose";
+import mongooseAggregatePaginate from "mongoose-aggregate-paginate-v2";
+
+
 
 const generateAccessAndRefreshTokens = async (UserId) => {
     try {
@@ -29,6 +32,7 @@ const generateAccessAndRefreshTokens = async (UserId) => {
 
 
 const registerUser = asyncHandler(async (req, res, next) => {
+
     // get user details from frontend
     // validate not empty
     // check if user already exists by email and username
@@ -369,6 +373,8 @@ const updateUserCoverImage = asyncHandler(async (req, res) => {
 
 
 
+// mongoose Aggregate pipelines
+
 const getUserChannelProfile = asyncHandler(async (req, res) => {
     const { username } = req.params;
 
@@ -477,8 +483,6 @@ const getUserChannelProfile = asyncHandler(async (req, res) => {
 
 
 });
-
-
 
 
 const getWatchHistory = asyncHandler(async (req, res) => {
