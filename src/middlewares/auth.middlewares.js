@@ -26,7 +26,7 @@ export const verifyJWT = asyncHandler(async (req, res, next) => {
         }
 
 
-        req.user = user
+        req.user = user   // great code 
         next()
 
     } catch (error) {
