@@ -89,7 +89,7 @@ const registerUser = asyncHandler(async (req, res, next) => {
         email,
         password,
         avatarPublicId: avatar.public_id,
-        coverImagePublicId:coverImage.public_id
+        coverImagePublicId: coverImage.public_id
 
     });
 
@@ -341,8 +341,8 @@ const updateUserAvatar = asyncHandler(async (req, res) => {
         {
             $set: {
                 avatar: avatar.url,
-                avatarPublicId:avatar.public_id
-           
+                avatarPublicId: avatar.public_id
+
             },
         },
         {
@@ -354,6 +354,7 @@ const updateUserAvatar = asyncHandler(async (req, res) => {
         .status(200)
         .json(new ApiResponse(200, user, "avatar updated successfully"));
 });
+
 const updateUserCoverImage = asyncHandler(async (req, res) => {
     const coverImageLocalPath = req.file?.path;
 
@@ -362,7 +363,7 @@ const updateUserCoverImage = asyncHandler(async (req, res) => {
         throw new ApiError(400, "cover image file is missing");
     }
 
-    
+
     console.log(req.user.coverImagePublicId)
     await destroyOnCloudinary(req.user.coverImagePublicId)
 
@@ -401,6 +402,7 @@ const updateUserCoverImage = asyncHandler(async (req, res) => {
 // mongoose Aggregate pipelines
 
 const getUserChannelProfile = asyncHandler(async (req, res) => {
+
     const { username } = req.params;
 
     if (!username.trim()) {
@@ -418,12 +420,15 @@ const getUserChannelProfile = asyncHandler(async (req, res) => {
             $lookup: {
 
                 from: "subscriptions",
-                localField: "_id",
-                foreignField: "channel",
+                localField: "_id",  // any unique field in user collection
+                foreignField: "channel",  // user
                 as: "subscribers",
 
             },
+
+
         },
+
 
         {
             $lookup: {
@@ -459,7 +464,7 @@ const getUserChannelProfile = asyncHandler(async (req, res) => {
                         then: true,
                         else: false,
 
-
+    
                     }
                 }
 
@@ -481,7 +486,9 @@ const getUserChannelProfile = asyncHandler(async (req, res) => {
                 subscribersCount: 1,
                 channelSubscribedTOCount: 1,
                 isSubscribed: 1,
-                email: 1
+                email: 1,
+
+
             }
         }
 
@@ -490,15 +497,19 @@ const getUserChannelProfile = asyncHandler(async (req, res) => {
 
 
 
+
+
+
+
     if (!channel?.length) {
-        throw new ApiError(404, "channel dose not exist")   //  may be i need to use next() like before but for now i am not sure
+        throw new ApiError(404, "channel dose not exist")   
 
     }
 
 
 
 
-    return res
+ return res
         .status(200)
         .json(new ApiResponse(200, channel[0], "channel profile fetched successfully"))
 
@@ -510,6 +521,12 @@ const getUserChannelProfile = asyncHandler(async (req, res) => {
 });
 
 
+
+
+
+
+
+
 const getWatchHistory = asyncHandler(async (req, res) => {
     const user = await User.aggregate([
         {
@@ -517,12 +534,16 @@ const getWatchHistory = asyncHandler(async (req, res) => {
                 _id: new mongoose.Types.ObjectId(req.user._id)
             }
         },
+
         {
             $lookup: {
                 from: "videos",
                 localField: "watchHistory",
                 foreignField: "_id",
                 as: "watchHistory",
+
+
+                
                 pipeline: [
                     {
                         $lookup: {
