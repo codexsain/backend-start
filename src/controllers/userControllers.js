@@ -286,7 +286,7 @@ const getCurrentUser = asyncHandler(async (req, res) => {
 const updateAccountDetails = asyncHandler(async (req, res) => {
     const { fullName, email } = req.body;
 
-    if (!fullName || email) {
+    if (!fullName || !email) {
         // maybe i need to use next() on this code like before but for noew i am nopt sure
         throw new ApiError(400, "fullName or email is required to update");
     }
@@ -315,7 +315,7 @@ const updateAccountDetails = asyncHandler(async (req, res) => {
 
 
 const updateUserAvatar = asyncHandler(async (req, res) => {
-    const avatarLocalPath = req.file?.path;
+    const avatarLocalPath = req.file.path;
 
     if (!avatarLocalPath) {
         // maybe i need to use next() on this code like before but for now i am not sure

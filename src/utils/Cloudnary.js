@@ -52,19 +52,19 @@ const destroyOnCloudinary = async (publicId) => {
 
     try {
 
-        if (!publicId) return null
+        if (!publicId) {
+            throw new ApiError(400, "publicId is required to delete a file from cloudinary")
+        }
 
 
-        const response = await cloudinary.uploader.destroy(publicId)
+        const response = await cloudinary.uploader.destroy(publicId  )
+
         console.log(response)
 
         return response
 
-
-
-
-
     }
+
 
     catch (error) {
 
@@ -76,9 +76,39 @@ const destroyOnCloudinary = async (publicId) => {
 }
 
 
+// fopr deleateing videos
+
+const destroyOnCloudinaryForVideo = async (publicId) => {
+
+    try {
+
+        if (!publicId) {
+            throw new ApiError(400, "publicId is required to delete a file from cloudinary")
+        }
 
 
-export { uploadOnCloudinary, destroyOnCloudinary }
+        const response = await cloudinary.uploader.destroy(publicId , {
+            resource_type: 'video'  // Specify that it's a video
+        })
+
+        console.log(response)
+
+        return response
+
+    }
+
+    
+    catch (error) {
+
+   console.log(error)
+
+    }
+
+
+}
+
+
+export { uploadOnCloudinary, destroyOnCloudinary  , destroyOnCloudinaryForVideo}
 
 
 
