@@ -1,18 +1,80 @@
 import mongoose, { isValidObjectId } from "mongoose"
-import { Video } from "../models/video.model.js"
-// import { User } from "../models/user.model.js"
+import { Video } from "../models/video.Model.js"
+import { User } from "../models/user.Model.js"
 import { ApiError } from "../utils/ApiError.js"
 import { ApiResponse } from "../utils/ApiResponse.js"
 import { asyncHandler } from "../utils/asyncHandler.js"
-import { uploadOnCloudinary, destroyOnCloudinary , destroyOnCloudinaryForVideo} from "../utils/cloudnary.js"
+import { uploadOnCloudinary, destroyOnCloudinary, destroyOnCloudinaryForVideo } from "../utils/cloudnary.js"
 
 
 const getAllVideos = asyncHandler(async (req, res) => {
+
     const { page = 1, limit = 10, query, sortBy, sortType, userId } = req.query
+
     //TODO: get all videos based on query, sort, pagination
-     
-   
-  
+
+   //  later 
+
+    const video = await User.aggregate([
+
+        {
+            $match: {
+                _id: new mongoose.Types.ObjectId(userId)
+            }
+
+        },
+        {
+            $lookup: {
+                from: "videos",
+                localField: "_id",
+                foreignField: "owner",
+                as: "videos",
+            }
+        },
+
+
+
+        {
+
+            $project: {
+                _id: 1,
+                userId: "$_id",  
+                videos: {
+                    $map: {
+                        input: "$videos",
+                        as: "video",
+                        in: {
+                            _id: "$$video._id",
+                            videoFile: "$$video.videoFile",
+                            thumbnail: "$$video.thumbnail",
+                            title: "$$video.title",
+                            description: "$$video.description",
+                            duration: "$$video.duration",
+                            views: "$$video.views",
+                            owner: "$$video.owner"
+                        }
+                    }
+                }
+            }
+        }
+
+
+    ])
+
+
+
+
+    console.log(video)
+
+    if (!video?.length) {
+        throw new ApiError(404, "channel dose not exist")
+
+    }
+
+    return res
+        .status(200)
+        .json(new ApiResponse(200, video[0], "videos fetched successfully"));
+
 
 
 
@@ -203,9 +265,9 @@ const deleteVideo = asyncHandler(async (req, res) => {
 
     const videoOFU = await Video.findById(videoId)
 
-   
-    const thumbnailPID =  videoOFU.thumbnailPublicId
-    const videoPID =  videoOFU.videoPublicId
+
+    const thumbnailPID = videoOFU.thumbnailPublicId
+    const videoPID = videoOFU.videoPublicId
 
     console.log("thumbnailPID", thumbnailPID)
     console.log("videoPID", videoPID)
@@ -223,7 +285,7 @@ const deleteVideo = asyncHandler(async (req, res) => {
     const video = await destroyOnCloudinaryForVideo(videoPID)
     const thumbnail = await destroyOnCloudinary(thumbnailPID)
 
-   
+
     await Video.findByIdAndDelete(videoId)
 
     return res
@@ -247,58 +309,58 @@ const togglePublishStatus = asyncHandler(async (req, res) => {
 
 
 
-        const ispublishedx = await Video.findById(videoId)
+    const ispublishedx = await Video.findById(videoId)
 
-        if (!ispublishedx) {
-            throw new ApiError(500, "something went wornge while geting ispublished data")
-        }
+    if (!ispublishedx) {
+        throw new ApiError(500, "something went wornge while geting ispublished data")
+    }
 
 
-        if (ispublishedx.isPublished === true) {
+    if (ispublishedx.isPublished === true) {
 
-            const IsPublishedfalse = await Video.findByIdAndUpdate(videoId,
-                {
-                    $set: {
+        const IsPublishedfalse = await Video.findByIdAndUpdate(videoId,
+            {
+                $set: {
 
-                        isPublished: false
-                    }
-                },
-                {
-                    returnDocument: 'after'
+                    isPublished: false
                 }
-            )
-            return res
-                .status(200)
-                .json(new ApiResponse(200, IsPublishedfalse, "Published status updateing succesfully done"));
+            },
+            {
+                returnDocument: 'after'
+            }
+        )
+        return res
+            .status(200)
+            .json(new ApiResponse(200, IsPublishedfalse, "Published status updateing succesfully done"));
 
-        }
+    }
 
 
-        if (ispublishedx.isPublished === false) {
-            console.log(Video.isPublished)
+    if (ispublishedx.isPublished === false) {
+        console.log(Video.isPublished)
 
-            const IsPublishedtrue = await Video.findByIdAndUpdate(videoId,
-                {
-                    $set: {
+        const IsPublishedtrue = await Video.findByIdAndUpdate(videoId,
+            {
+                $set: {
 
-                        isPublished: true
-                    }
-                },
-
-                {
-                    returnDocument: 'after'
+                    isPublished: true
                 }
-            )
+            },
 
-            return res
-                .status(200)
-                .json(new ApiResponse(200, IsPublishedtrue, "Published status updateing succesfully done"));
+            {
+                returnDocument: 'after'
+            }
+        )
+
+        return res
+            .status(200)
+            .json(new ApiResponse(200, IsPublishedtrue, "Published status updateing succesfully done"));
 
 
-        }
-    
+    }
 
-    
+
+
 
 })
 

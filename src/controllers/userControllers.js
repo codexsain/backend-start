@@ -29,8 +29,6 @@ const generateAccessAndRefreshTokens = async (UserId) => {
 };
 
 
-
-
 const registerUser = asyncHandler(async (req, res, next) => {
 
     // get user details from frontend
@@ -105,8 +103,6 @@ const registerUser = asyncHandler(async (req, res, next) => {
         .status(201)
         .json(new ApiResponse(200, createdUser, "User registered successfully"));
 });
-
-
 
 
 const loginUser = asyncHandler(async (req, res, next) => {
@@ -202,8 +198,6 @@ const logOutUser = asyncHandler(async (req, res) => {
 });
 
 
-
-
 const refreshAccessToken = asyncHandler(async (req, res) => {
     const incomeingRefreshToken = req.refreshToken || req.body.refreshToken;
 
@@ -253,7 +247,6 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
 });
 
 
-
 const changeCurrentPassword = asyncHandler(async (req, res) => {
     const { oldPassword, newPassword } = req.body;
 
@@ -274,13 +267,11 @@ const changeCurrentPassword = asyncHandler(async (req, res) => {
 });
 
 
-
 const getCurrentUser = asyncHandler(async (req, res) => {
     return res
         .status(200)
         .json(new ApiResponse(200, req.user, "current user fetched successfully"));
 });
-
 
 
 const updateAccountDetails = asyncHandler(async (req, res) => {
@@ -310,8 +301,6 @@ const updateAccountDetails = asyncHandler(async (req, res) => {
         .status(200)
         .json(new ApiResponse(200, user, "account details updated successfully"));
 });
-
-
 
 
 const updateUserAvatar = asyncHandler(async (req, res) => {
@@ -354,6 +343,7 @@ const updateUserAvatar = asyncHandler(async (req, res) => {
         .status(200)
         .json(new ApiResponse(200, user, "avatar updated successfully"));
 });
+
 
 const updateUserCoverImage = asyncHandler(async (req, res) => {
     const coverImageLocalPath = req.file?.path;
@@ -535,12 +525,12 @@ const getWatchHistory = asyncHandler(async (req, res) => {
             }
         },
 
-        {
-            $lookup: {
+        { $lookup: {
                 from: "videos",
                 localField: "watchHistory",
                 foreignField: "_id",
                 as: "watchHistory",
+
 
 
                 
