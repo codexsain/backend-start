@@ -6,23 +6,33 @@ import { ApiResponse } from "../utils/ApiResponse.js"
 import { asyncHandler } from "../utils/asyncHandler.js"
 import { uploadOnCloudinary, destroyOnCloudinary, destroyOnCloudinaryForVideo } from "../utils/cloudnary.js"
 
-
 const getAllVideos = asyncHandler(async (req, res) => {
+    //TODO: get all videos based on query, sort, pagination      // compleate
 
-    const { page = 1, limit = 10, query, sortBy, sortType, userId } = req.query
+    let { page, limit, query, sortBy, userId } = req.query
 
-    //TODO: get all videos based on query, sort, pagination
+    page = parseInt(page)
+    limit = parseInt(limit)
 
-   //  later 
 
-    const video = await User.aggregate([
+    let titleVariable = query
+    const skip = (page - 1) * limit;
+    const hasTitle = query && query.trim() !== "";
+
+
+
+
+    // MongoDB Aggregation
+    let video = await User.aggregate([
+
 
         {
             $match: {
                 _id: new mongoose.Types.ObjectId(userId)
             }
-
         },
+
+
         {
             $lookup: {
                 from: "videos",
@@ -33,15 +43,22 @@ const getAllVideos = asyncHandler(async (req, res) => {
         },
 
 
-
         {
-
             $project: {
                 _id: 1,
-                userId: "$_id",  
                 videos: {
                     $map: {
-                        input: "$videos",
+                        input: hasTitle
+                            ? {
+                                $filter: {
+                                    input: "$videos",
+                                    as: "video",
+                                    cond: {
+                                        $eq: ["$$video.title", query]
+                                    }
+                                }
+                            }
+                            : "$videos",  // If titleVariable is empty, use all videos
                         as: "video",
                         in: {
                             _id: "$$video._id",
@@ -51,12 +68,39 @@ const getAllVideos = asyncHandler(async (req, res) => {
                             description: "$$video.description",
                             duration: "$$video.duration",
                             views: "$$video.views",
-                            owner: "$$video.owner"
+                            owner: "$$video.owner",
+                            sortValue: `$$video.${sortBy}`
+
                         }
                     }
                 }
             }
-        }
+        },
+
+        // Step 4: Unwind videos array to paginate
+        {
+            $unwind: "$videos"
+        },
+
+
+        // Step 5: Skip documents based on page
+        {
+            $skip: skip
+        },
+
+        // Step 6: Limit documents based on limit
+        {
+            $limit: limit
+        },
+
+        // Step 7: Group back videos array
+        {
+            $group: {
+                _id: "$_id",
+                videos: { $push: "$videos" }
+            }
+        },
+
 
 
     ])
@@ -64,10 +108,11 @@ const getAllVideos = asyncHandler(async (req, res) => {
 
 
 
+
     console.log(video)
 
     if (!video?.length) {
-        throw new ApiError(404, "channel dose not exist")
+        throw new ApiError(404, "video dose not exist")
 
     }
 
@@ -79,8 +124,6 @@ const getAllVideos = asyncHandler(async (req, res) => {
 
 
 })
-
-
 
 const publishAVideo = asyncHandler(async (req, res) => {
 
@@ -117,7 +160,7 @@ const publishAVideo = asyncHandler(async (req, res) => {
 
 
     const videoP = await Video.create({
-        title,
+        title: title.trim().toLowerCase(),
         description,
         videoFile: video.url,
         thumbnail: thumbnail.url,
@@ -128,7 +171,6 @@ const publishAVideo = asyncHandler(async (req, res) => {
         videoPublicId: video.public_id
 
     })
-
 
 
     res
@@ -142,7 +184,7 @@ const getVideoById = asyncHandler(async (req, res) => {
     const { videoId } = req.params
 
     // get video by id   // compleate
-    const video = await Video.findById(videoId)
+    const video = await Video.findById(videoId).select("-videoPublicId -thumbnailPublicId")
 
     return res
         .status(201)
@@ -173,7 +215,7 @@ const updateVideo = asyncHandler(async (req, res) => {
 
         {
             $set: {
-                title,
+                title: title.trim().toLowerCase(),
                 description,
 
             },
@@ -181,7 +223,7 @@ const updateVideo = asyncHandler(async (req, res) => {
 
         {
             new: true,
-        })
+        }).select("-videoPublicId -thumbnailPublicId")
 
 
     return res
