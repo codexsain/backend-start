@@ -36,14 +36,11 @@ router
     .route("/:videoId")
     .get(getVideoById)
     .delete(deleteVideo)
-    // .patch(upload.single("thumbnail"), updateVideo);
     .patch(updateVideo)
     
 
 
 router.route("/thumbnail/:videoId").patch(upload.single("thumbnail"), updateVideothumbnail);
-
-
 router.route("/toggle/publish/:videoId").patch(togglePublishStatus);
 
 export default router

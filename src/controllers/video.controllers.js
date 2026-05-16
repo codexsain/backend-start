@@ -6,6 +6,9 @@ import { ApiResponse } from "../utils/ApiResponse.js"
 import { asyncHandler } from "../utils/asyncHandler.js"
 import { uploadOnCloudinary, destroyOnCloudinary, destroyOnCloudinaryForVideo } from "../utils/cloudnary.js"
 
+
+ // mongoDb aggregation pipeline use on this function
+
 const getAllVideos = asyncHandler(async (req, res) => {
     //TODO: get all videos based on query, sort, pagination      // compleate
 
@@ -186,6 +189,10 @@ const getVideoById = asyncHandler(async (req, res) => {
     // get video by id   // compleate
     const video = await Video.findById(videoId).select("-videoPublicId -thumbnailPublicId")
 
+    if (!video) {
+        throw new ApiError(404, "video not found with this ID")
+    }
+    
     return res
         .status(201)
         .json(new ApiResponse(200, video, "video fetched successfully"));
@@ -201,6 +208,12 @@ const updateVideo = asyncHandler(async (req, res) => {
 
         throw new ApiError(400, "video id is required")
 
+    }
+     
+    const videoIdCheak = await Video.findById(videoId)
+
+    if (!videoIdCheak) {
+        throw new ApiError(404, "video not found with this ID")
     }
 
     const { title, description } = req.body
@@ -245,6 +258,13 @@ const updateVideothumbnail = asyncHandler(async (req, res) => {
 
 
     const video = await Video.findById(videoId)
+
+    if (!video) {
+
+        throw new ApiError(404, "video not found with this ID")
+    
+    }
+
     const thumbnailPID = await video.thumbnailPublicId
 
 
@@ -299,10 +319,15 @@ const updateVideothumbnail = asyncHandler(async (req, res) => {
 const deleteVideo = asyncHandler(async (req, res) => {
     //TODO: delete video         compleate
     const { videoId } = req.params
-
+    
     if (!videoId) {
 
         throw new ApiError(400, "video id is required")
+    }
+   const videoIdCheak = await Video.findById(videoId)
+
+    if (!videoIdCheak) {
+        throw new ApiError(404, "video not found with this ID")
     }
 
     const videoOFU = await Video.findById(videoId)
@@ -405,10 +430,6 @@ const togglePublishStatus = asyncHandler(async (req, res) => {
 
 
 })
-
-
-
-
 
 
 
