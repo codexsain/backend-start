@@ -1,5 +1,9 @@
 import mongoose, { isValidObjectId } from "mongoose"
 import { Video } from "../models/video.Model.js"
+import { Comment } from "../models/comment.Model.js"
+import { Like } from "../models/like.Model.js"
+import { Playlist } from "../models/playlist.Model.js"
+
 import { User } from "../models/user.Model.js"
 import { ApiError } from "../utils/ApiError.js"
 import { ApiResponse } from "../utils/ApiResponse.js"
@@ -7,7 +11,7 @@ import { asyncHandler } from "../utils/asyncHandler.js"
 import { uploadOnCloudinary, destroyOnCloudinary, destroyOnCloudinaryForVideo } from "../utils/cloudnary.js"
 
 
- // mongoDb aggregation pipeline use on this function
+// mongoDb aggregation pipeline use on this function
 
 const getAllVideos = asyncHandler(async (req, res) => {
     //TODO: get all videos based on query, sort, pagination      // compleate
@@ -45,7 +49,7 @@ const getAllVideos = asyncHandler(async (req, res) => {
             }
         },
 
-        
+
 
         {
             $project: {
@@ -179,7 +183,7 @@ const publishAVideo = asyncHandler(async (req, res) => {
     })
 
 
-    res
+    return res
         .status(201)
         .json(new ApiResponse(200, videoP, "video create successfully"));
 
@@ -195,7 +199,7 @@ const getVideoById = asyncHandler(async (req, res) => {
     if (!video) {
         throw new ApiError(404, "video not found with this ID")
     }
-    
+
     return res
         .status(201)
         .json(new ApiResponse(200, video, "video fetched successfully"));
@@ -212,7 +216,7 @@ const updateVideo = asyncHandler(async (req, res) => {
         throw new ApiError(400, "video id is required")
 
     }
-     
+
     const videoIdCheak = await Video.findById(videoId)
 
     if (!videoIdCheak) {
@@ -265,7 +269,7 @@ const updateVideothumbnail = asyncHandler(async (req, res) => {
     if (!video) {
 
         throw new ApiError(404, "video not found with this ID")
-    
+
     }
 
     const thumbnailPID = await video.thumbnailPublicId
@@ -322,12 +326,12 @@ const updateVideothumbnail = asyncHandler(async (req, res) => {
 const deleteVideo = asyncHandler(async (req, res) => {
     //TODO: delete video         compleate
     const { videoId } = req.params
-    
+
     if (!videoId) {
 
         throw new ApiError(400, "video id is required")
     }
-   const videoIdCheak = await Video.findById(videoId)
+    const videoIdCheak = await Video.findById(videoId)
 
     if (!videoIdCheak) {
         throw new ApiError(404, "video not found with this ID")
@@ -354,8 +358,18 @@ const deleteVideo = asyncHandler(async (req, res) => {
 
     const video = await destroyOnCloudinaryForVideo(videoPID)
     const thumbnail = await destroyOnCloudinary(thumbnailPID)
+    await Like.deleteMany({ video: videoId })
+    
+    await Playlist.updateOne(
+        {
+            videos: videoId
+        },
+        {                                  //  chances to geting error from this code
+            $pull: { videos: videoId }
+        }
+    )
 
-
+    await Comment.deleteMany({ video: videoId })
     await Video.findByIdAndDelete(videoId)
 
     return res

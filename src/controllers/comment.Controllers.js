@@ -62,7 +62,7 @@ const getVideoComments = asyncHandler(async (req, res) => {
         throw new ApiError(500, "somthing worng while geting video comments")
     }
 
-    res.status(200).json(new ApiResponse(200, comments, "Comments fetched successfully"));
+   return res.status(200).json(new ApiResponse(200, comments, "Comments fetched successfully"));
 
 
 });
@@ -96,7 +96,7 @@ const addComment = asyncHandler(async (req, res) => {
     }
 
     console.log(comment)
-    res.
+  return  res.
         status(201)
         .json(new ApiResponse(200, "Comment added successfully", comment))
 
@@ -141,7 +141,7 @@ const updateComment = asyncHandler(async (req, res) => {
     }
 
 
-    res.
+  return  res.
         status(200)
         .json(new ApiResponse(200, updatedComment, "comment updated successfully"))
 
@@ -163,7 +163,7 @@ const deleteComment = asyncHandler(async (req, res) => {
         throw new ApiError(500, "something went wornge while deleteing comment ")
     }
 
-    res.
+  return  res.
         status(201)
         .json(new ApiResponse(200, '', "comment successfully  deleted"))
 

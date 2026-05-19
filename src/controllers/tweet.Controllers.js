@@ -31,7 +31,7 @@ const createTweet = asyncHandler(async (req, res) => {
     }
 
 
-    res.
+    return res.
         status(201)
         .json(new ApiResponse(true, tweet, "Tweet created successfully"))
 
@@ -76,7 +76,7 @@ const getUserTweets = asyncHandler(async (req, res) => {
     }
 
 
-    res.status(200).json(new ApiResponse(200, tweets, "User tweets retrieved successfully"))
+    return res.status(200).json(new ApiResponse(200, tweets, "User tweets retrieved successfully"))
 
 
 })
@@ -92,7 +92,7 @@ const updateTweet = asyncHandler(async (req, res) => {
     if (!tweetId) {
         throw new ApiError(400, "Tweet ID is required")
     }
-     
+
     const tweetIdCheak = await Tweet.findById(tweetId)
 
     if (!tweetIdCheak) {
@@ -126,7 +126,7 @@ const updateTweet = asyncHandler(async (req, res) => {
         throw new ApiError(500, "something went wrong while updating the tweet")
     }
 
-    res.status(200).json(new ApiResponse(200, updatedTweet, "Tweet updated successfully"))
+    return res.status(200).json(new ApiResponse(200, updatedTweet, "Tweet updated successfully"))
 
 })
 
@@ -137,12 +137,12 @@ const deleteTweet = asyncHandler(async (req, res) => {
     if (!tweetId) {
         throw new ApiError(400, "Tweet ID is required")
     }
-   
+
     const tweetIdCheak = await Tweet.findById(tweetId)
 
     if (!tweetIdCheak) {
         throw new ApiError(404, "Tweet not found with this ID")
-    } 
+    }
 
     if (! await mongoose.isValidObjectId(tweetId)) {
         throw new ApiError(400, "Invalid tweet ID")
@@ -155,7 +155,7 @@ const deleteTweet = asyncHandler(async (req, res) => {
         console.error("Error while deleting tweet:", error)
     }
 
-    res.status(200).json(new ApiResponse(200, "", "Tweet deleted successfully"))
+    return res.status(200).json(new ApiResponse(200, "", "Tweet deleted successfully"))
 
 })
 
