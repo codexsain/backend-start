@@ -6,7 +6,7 @@ import { asyncHandler } from "../utils/asyncHandler.js"
 
 
 const getVideoComments = asyncHandler(async (req, res) => {
-    
+
     //TODO: get all comments for a video    // complet
 
     const { videoId } = req.params;
@@ -62,7 +62,7 @@ const getVideoComments = asyncHandler(async (req, res) => {
         throw new ApiError(500, "somthing worng while geting video comments")
     }
 
-   return res.status(200).json(new ApiResponse(200, comments, "Comments fetched successfully"));
+    return res.status(200).json(new ApiResponse(200, comments, "Comments fetched successfully"));
 
 
 });
@@ -96,7 +96,7 @@ const addComment = asyncHandler(async (req, res) => {
     }
 
     console.log(comment)
-  return  res.
+    return res.
         status(201)
         .json(new ApiResponse(200, "Comment added successfully", comment))
 
@@ -141,7 +141,7 @@ const updateComment = asyncHandler(async (req, res) => {
     }
 
 
-  return  res.
+    return res.
         status(200)
         .json(new ApiResponse(200, updatedComment, "comment updated successfully"))
 
@@ -152,20 +152,36 @@ const updateComment = asyncHandler(async (req, res) => {
 const deleteComment = asyncHandler(async (req, res) => {
     // TODO: delete a comment          //  complete
     const { commentId } = req.params
+    const userid = req.user._id
 
     if (!commentId) {
         throw new ApiError(400, "commentID is required")
     }
 
-    const dcommentid = await Comment.findByIdAndDelete(commentId)
+    const realuser = await Comment.findOne({
+        _id: commentId,
+        owner: userid
+    })
+    
+    console.log(realuser)
+    if (realuser) {
 
-    if (!dcommentid) {
-        throw new ApiError(500, "something went wornge while deleteing comment ")
+
+        const dcommentid = await Comment.findByIdAndDelete(commentId)
+
+        if (!dcommentid) {
+            throw new ApiError(500, "something went wornge while deleteing comment ")
+        }
+
+        return res.
+            status(201)
+            .json(new ApiResponse(200, '', "comment successfully  deleted"))
     }
 
-  return  res.
-        status(201)
-        .json(new ApiResponse(200, '', "comment successfully  deleted"))
+    else {
+
+        throw new ApiError("you are not able to remove this comment ")
+    }
 
 })
 
